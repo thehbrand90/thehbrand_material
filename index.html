@@ -128,10 +128,14 @@ td input::placeholder { color: #5a5040; }
 .del-btn:hover { color: var(--red); background: rgba(192,57,43,0.1); }
 .drag-handle { cursor: grab; color: var(--text-muted); font-size: 14px; text-align: center; user-select: none; padding: 0 4px; opacity: 0.35; transition: opacity 0.15s; }
 .drag-handle:active { cursor: grabbing; }
-tr:hover .drag-handle { opacity: 0.8; color: var(--gold); }
+tr:hover .drag-handle { opacity: 0.9; color: var(--gold); }
 #table-body tr.dragging { opacity: 0.35; background: rgba(201,169,110,0.04); }
 #table-body tr.drag-over-top { box-shadow: 0 -2px 0 var(--gold); }
 #table-body tr.drag-over-bot { box-shadow: 0 2px 0 var(--gold); }
+.loc-wrapper { position: relative; display: flex; align-items: center; }
+.loc-select { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); background: rgba(201,169,110,0.12); border: none; border-radius: 3px; color: var(--gold); font-size: 10px; cursor: pointer; padding: 2px 3px; line-height: 1; opacity: 0; transition: opacity 0.15s; z-index: 2; }
+tr:hover .loc-select { opacity: 1; }
+.loc-select:hover { background: rgba(201,169,110,0.28); }
 .btn-row-add { background: transparent; border: 1px dashed var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; transition: all 0.2s; margin-top: 10px; display: inline-block; }
 .btn-row-add:hover { border-color: var(--gold); color: var(--gold); }
 
@@ -6740,14 +6744,22 @@ function renderTable(items) {
   if (items.length === 0) addRow(); else items.forEach(r => addRow(r));
   updateNums();
 }
+const LOC_OPTIONS = ['거실','안방','주방','수납','공용욕실','안방욕실','현관','베란다','아이방','서재방'];
+
 function addRow(data={}) {
   const tbody = document.getElementById('table-body');
   const tr = document.createElement('tr');
   tr.draggable = true;
+  const locVal = esc(data.loc||'');
   tr.innerHTML = `
     <td class="drag-handle no-print" title="드래그하여 순서 변경">⠿</td>
     <td><span class="row-num">-</span></td>
-    <td><input class="cell-loc"  value="${esc(data.loc||'')}"  placeholder="예: 거실"></td>
+    <td>
+      <div class="loc-wrapper">
+        <input class="cell-loc" value="${locVal}" placeholder="예: 거실" style="padding-right:22px;">
+        <button class="loc-select no-print" title="위치 선택" onclick="openLocPicker(this)">▾</button>
+      </div>
+    </td>
     <td><input class="cell-part" value="${esc(data.part||'')}" placeholder="예: 바닥재"></td>
     <td><input class="cell-spec" value="${esc(data.spec||'')}" placeholder="예: LX하우시스 강마루 HU-831"></td>
     <td><input class="cell-note" value="${esc(data.note||'')}" placeholder="수량·특이사항"></td>
@@ -6758,6 +6770,36 @@ function addRow(data={}) {
   tbody.appendChild(tr);
   updateNums();
 }
+
+/* ── 위치 드롭다운 피커 ── */
+let _locPicker = null;
+function openLocPicker(btn) {
+  if (_locPicker) { _locPicker.remove(); _locPicker = null; return; }
+  const input = btn.closest('.loc-wrapper').querySelector('.cell-loc');
+  const rect  = btn.getBoundingClientRect();
+  const menu  = document.createElement('div');
+  menu.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.bottom+2}px;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,0.5);z-index:9000;min-width:120px;overflow:hidden;`;
+  LOC_OPTIONS.forEach(opt => {
+    const item = document.createElement('div');
+    item.textContent = opt;
+    item.style.cssText = 'padding:8px 14px;font-size:13px;cursor:pointer;color:var(--text);transition:background 0.1s;';
+    item.onmouseenter = () => item.style.background = 'rgba(201,169,110,0.12)';
+    item.onmouseleave = () => item.style.background = '';
+    item.onclick = () => { input.value = opt; markUnsaved(); closePicker(); };
+    menu.appendChild(item);
+  });
+  const direct = document.createElement('div');
+  direct.textContent = '✏ 직접입력';
+  direct.style.cssText = 'padding:8px 14px;font-size:13px;cursor:pointer;color:var(--gold);border-top:1px solid var(--border);transition:background 0.1s;';
+  direct.onmouseenter = () => direct.style.background = 'rgba(201,169,110,0.08)';
+  direct.onmouseleave = () => direct.style.background = '';
+  direct.onclick = () => { input.focus(); input.select(); closePicker(); };
+  menu.appendChild(direct);
+  document.body.appendChild(menu);
+  _locPicker = menu;
+  setTimeout(() => document.addEventListener('click', closePicker, {once:true}), 10);
+}
+function closePicker() { if(_locPicker){_locPicker.remove();_locPicker=null;} }
 function delRow(btn) { btn.closest('tr').remove(); updateNums(); markUnsaved(); }
 
 /* ── DRAG & DROP 순서 변경 ── */
@@ -6780,20 +6822,15 @@ function initDragRow(tr) {
     if (!_dragSrc || _dragSrc === tr) return;
     document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('drag-over-top','drag-over-bot'));
     const rect = tr.getBoundingClientRect();
-    const mid  = rect.top + rect.height / 2;
-    tr.classList.add(e.clientY < mid ? 'drag-over-top' : 'drag-over-bot');
+    tr.classList.add(e.clientY < rect.top + rect.height/2 ? 'drag-over-top' : 'drag-over-bot');
   });
-  tr.addEventListener('dragleave', () => {
-    tr.classList.remove('drag-over-top','drag-over-bot');
-  });
+  tr.addEventListener('dragleave', () => tr.classList.remove('drag-over-top','drag-over-bot'));
   tr.addEventListener('drop', e => {
     e.preventDefault();
     if (!_dragSrc || _dragSrc === tr) return;
     const rect = tr.getBoundingClientRect();
-    const mid  = rect.top + rect.height / 2;
-    const tbody = tr.parentNode;
-    if (e.clientY < mid) tbody.insertBefore(_dragSrc, tr);
-    else tbody.insertBefore(_dragSrc, tr.nextSibling);
+    if (e.clientY < rect.top + rect.height/2) tr.parentNode.insertBefore(_dragSrc, tr);
+    else tr.parentNode.insertBefore(_dragSrc, tr.nextSibling);
     tr.classList.remove('drag-over-top','drag-over-bot');
   });
 }
