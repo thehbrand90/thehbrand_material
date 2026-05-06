@@ -126,6 +126,12 @@ td input::placeholder { color: #5a5040; }
 .row-num { color: var(--text-muted); font-size: 11px; text-align: center; padding: 7px 6px; user-select: none; }
 .del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 16px; padding: 4px 8px; border-radius: 3px; transition: all 0.15s; line-height: 1; }
 .del-btn:hover { color: var(--red); background: rgba(192,57,43,0.1); }
+.drag-handle { cursor: grab; color: var(--text-muted); font-size: 14px; text-align: center; user-select: none; padding: 0 4px; opacity: 0.35; transition: opacity 0.15s; }
+.drag-handle:active { cursor: grabbing; }
+tr:hover .drag-handle { opacity: 0.8; color: var(--gold); }
+#table-body tr.dragging { opacity: 0.35; background: rgba(201,169,110,0.04); }
+#table-body tr.drag-over-top { box-shadow: 0 -2px 0 var(--gold); }
+#table-body tr.drag-over-bot { box-shadow: 0 2px 0 var(--gold); }
 .btn-row-add { background: transparent; border: 1px dashed var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; transition: all 0.2s; margin-top: 10px; display: inline-block; }
 .btn-row-add:hover { border-color: var(--gold); color: var(--gold); }
 
@@ -235,6 +241,7 @@ td input::placeholder { color: #5a5040; }
         <table>
           <thead>
             <tr>
+              <th class="no-print" style="width:20px;"></th>
               <th style="width:30px;">#</th>
               <th style="width:13%;">위치 (실명)</th>
               <th style="width:14%;">항목 (구분)</th>
@@ -5890,230 +5897,110 @@ let db = {
             {
               "loc": "공용욕실",
               "part": "타일",
-              "spec": "이비자화이트 600각 18BOX / 욕조",
-              "note": "난방드라이픽스 필요 / 쌍공자재금지"
+              "spec": "이비자화이트 600각",
+              "note": "욕조"
             },
             {
               "loc": "안방욕실",
               "part": "타일",
-              "spec": "쿠바아이보리 600각 18BOX",
-              "note": "휴젠뜨 고객이 가져옴"
+              "spec": "쿠바아이보리 600각",
+              "note": ""
             },
             {
               "loc": "현관",
               "part": "타일",
-              "spec": "툰드라베이지 600각 8BOX",
+              "spec": "툰드라베이지 600각",
               "note": ""
             },
             {
-              "loc": "부엌(벽)",
+              "loc": "주방벽",
               "part": "타일",
-              "spec": "오리진블랑코 600각 6BOX",
+              "spec": "오리진블랑코 600각",
               "note": ""
             },
             {
-              "loc": "세탁실/안방발코니",
-              "part": "타일",
-              "spec": "교체없음(재사용)",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
+              "loc": "욕실",
               "part": "양변기",
-              "spec": "아메리칸스탠다드 웨이브스퀘어 C319500A 투피스 2EA",
-              "note": ""
+              "spec": "웨이브스퀘어",
+              "note": "2EA"
             },
             {
               "loc": "공용욕실",
               "part": "세면대",
-              "spec": "아메리칸스탠다드 플랫라운드 CCASF515 2EA",
-              "note": "매립후버림이"
+              "spec": "플랫라운드",
+              "note": "2EA"
             },
             {
-              "loc": "공용욕실",
-              "part": "세면수전",
-              "spec": "베르사츠 BSL-5001SS 서스무광",
-              "note": ""
+              "loc": "욕실",
+              "part": "수전",
+              "spec": "무광 사각타입",
+              "note": "2SET"
             },
             {
-              "loc": "공용욕실",
-              "part": "샤워수전",
-              "spec": "베르사츠 BSL-5005SS 서스무광",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "수건걸이",
-              "spec": "엠테크 9100 스텐 무광 / 변경가능",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "휴지걸이",
-              "spec": "엠테크 9100 스텐 무광 / 변경가능",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
+              "loc": "욕실",
               "part": "욕실장",
-              "spec": "유일바스 분할플랩장 (욕실2곳동일) / 플랩+여닫이 주백색 안전기",
+              "spec": "플랩+여닫이 상하장",
               "note": ""
             },
             {
-              "loc": "공용욕실",
-              "part": "슬라이드바",
-              "spec": "비바테 사각 무광 슬라이드바 TB-307",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "유가(배수)",
-              "spec": "라인유가 65파이 또는 45파이 펜심",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "청소건",
-              "spec": "베르사츠 스프레이건 BRA-001 돼지꼬리형",
-              "note": "꼬불이 2EA"
-            },
-            {
-              "loc": "공용욕실",
+              "loc": "욕실",
               "part": "ACC",
-              "spec": "디자인유가 2EA / 매립휴지걸이 2EA / 수건선반 1EA / 타올걸이 1EA",
+              "spec": "꼬불이 청소건 2EA / 디자인유가 / 매립휴지걸이",
               "note": ""
             },
             {
               "loc": "전체",
               "part": "도배",
-              "spec": "LX디아망포티스 스웨이드 페인트 샌드그레이지 DF004-03 / 각방+천정 LX 7090-01 새하얀화이트",
+              "spec": "공용부 포티스 / 전체 샌드 계열 / 천정 화이트",
               "note": ""
             },
             {
-              "loc": "방화문 내부",
+              "loc": "전체",
               "part": "필름",
-              "spec": "콘크리트화이트 한솔",
-              "note": "방화문 외부 작업 없음"
-            },
-            {
-              "loc": "현관목공알판/비대칭현관중문",
-              "part": "필름",
-              "spec": "콘크리트화이트",
-              "note": ""
-            },
-            {
-              "loc": "각방 9mm문틀/문선/욕실2곳/창호전체",
-              "part": "필름",
-              "spec": "영림 발렌블랑 PX449",
-              "note": ""
-            },
-            {
-              "loc": "안방발코니 창고장(도어+마감재)",
-              "part": "필름",
-              "spec": "예림 크림화이트 WA06",
-              "note": ""
-            },
-            {
-              "loc": "세탁실 문틀+도어",
-              "part": "필름",
-              "spec": "포그그레이 한솔",
+              "spec": "콘크리트화이트 / 칼프브라운우드 / 포그그레이",
               "note": ""
             },
             {
               "loc": "도어",
               "part": "도어",
-              "spec": "영림도어 발렌블랑 PX449 민판",
-              "note": ""
-            },
-            {
-              "loc": "도어",
-              "part": "손잡이",
-              "spec": "도무스 711NI",
+              "spec": "민판 / 사각 손잡이",
               "note": ""
             },
             {
               "loc": "중문",
               "part": "중문",
-              "spec": "제작중문 비대칭여닫이 / 모루유리 / 손잡이 'c'자 / 콘크리트화이트",
-              "note": "동림삼익 참고"
+              "spec": "비대칭 / 모루유리",
+              "note": ""
             },
             {
               "loc": "전체",
               "part": "바닥재",
-              "spec": "LX하우시스 스톤마루 솔티애쉬",
-              "note": ""
-            },
-            {
-              "loc": "주방(부엌/수납가구)",
-              "part": "가구",
-              "spec": "포그그레이 한솔보드E0",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "대리석",
-              "spec": "오로라웜블랑 LX하우시스",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "싱크볼",
-              "spec": "백조 깜뽀르떼 860",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "후드",
-              "spec": "하츠빌트인후드",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "수전",
-              "spec": "카시아 4회전 와이드수전 무광니켈",
-              "note": ""
-            },
-            {
-              "loc": "주방 펜트리/안방붙박이/화장대/안방 작은방 붙박이(노출서랍포함)",
-              "part": "가구",
-              "spec": "포그그레이 한솔보드E0",
-              "note": ""
-            },
-            {
-              "loc": "신발장",
-              "part": "가구",
-              "spec": "콘크리트화이트+중앙오픈장(칼프브라운우드) 한솔보드E0",
-              "note": ""
-            },
-            {
-              "loc": "창고장(선반만2EA)",
-              "part": "가구",
-              "spec": "선반 현재 위치 그대로 설치",
-              "note": ""
-            },
-            {
-              "loc": "주방펜트리",
-              "part": "시스템장",
-              "spec": "c자형태선반 (상부 선반제외) 화이트",
-              "note": ""
-            },
-            {
-              "loc": "거실",
-              "part": "실링팬",
-              "spec": "루씨에어 레이더3 화이트",
-              "note": ""
-            },
-            {
-              "loc": "전체",
-              "part": "스위치/콘센트",
-              "spec": "진흥J 또는 다이아실버 택1",
+              "spec": "솔티애쉬",
               "note": ""
             },
             {
               "loc": "시스템에어컨",
               "part": "시스템에어컨",
-              "spec": "LG 4대 (거실1, 입구방1, 작은방1, 안방1)",
-              "note": "4대 동시가동 시 해당력 초과주의"
+              "spec": "LG 4대",
+              "note": ""
+            },
+            {
+              "loc": "거실",
+              "part": "실링팬",
+              "spec": "루씨에어 레이더 3 올화이트",
+              "note": ""
+            },
+            {
+              "loc": "주방",
+              "part": "가구",
+              "spec": "깜포르테 / 사각싱크볼 / 빌트인후드 / 광폭아일랜드",
+              "note": ""
+            },
+            {
+              "loc": "수납",
+              "part": "가구",
+              "spec": "신발장 / 붙박이 / 안방붙박이 / 발코니장",
+              "note": ""
             }
           ],
           "savedAt": "",
@@ -6498,291 +6385,6 @@ let db = {
           ],
           "savedAt": "",
           "savedBy": ""
-        },
-        {
-          "id": "site_suwan_hoban_verdium2_205_1004",
-          "name": "수완 호반베르디움 2차 205동 1004호",
-          "addr": "32평",
-          "items": [
-            {
-              "loc": "현관",
-              "part": "타일",
-              "spec": "쿠바아이보리 600각 / 메지 G9 베이지",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "타일",
-              "spec": "아레크 아이보리 600각 / 메지 G9 베이지",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "타일",
-              "spec": "아레크 그레이 600각 / 메지 G9 그레이",
-              "note": ""
-            },
-            {
-              "loc": "주방발코니(세탁실)",
-              "part": "타일",
-              "spec": "VG 3355 / 메지 G9 그레이",
-              "note": ""
-            },
-            {
-              "loc": "안방발코니",
-              "part": "타일",
-              "spec": "VG 3355 / 메지 G9 그레이",
-              "note": ""
-            },
-            {
-              "loc": "주방(벽)",
-              "part": "타일",
-              "spec": "미떼화이트 600각 / 메지 G9 라이트아이보리",
-              "note": ""
-            },
-            {
-              "loc": "각방+천정",
-              "part": "도배",
-              "spec": "개나리로하스 87456-1 회벽크림화이트 실크벽지",
-              "note": ""
-            },
-            {
-              "loc": "공용부(주방+거실)",
-              "part": "도배",
-              "spec": "디아망 퓨어화이트 PR002-10",
-              "note": ""
-            },
-            {
-              "loc": "전체",
-              "part": "바닥재",
-              "spec": "나투스진 이모션블랑",
-              "note": ""
-            },
-            {
-              "loc": "창호전체",
-              "part": "필름",
-              "spec": "WA-06 크림화이트 / 샷시 손잡이 그립형 전체교체",
-              "note": "이중창 포함"
-            },
-            {
-              "loc": "방화문 내부",
-              "part": "필름",
-              "spec": "스킨149",
-              "note": ""
-            },
-            {
-              "loc": "방화문 외부",
-              "part": "필름",
-              "spec": "차콜113 (체크 후 결정)",
-              "note": ""
-            },
-            {
-              "loc": "안방발코니 방화문",
-              "part": "필름",
-              "spec": "영림 화이트스톤 PX451",
-              "note": ""
-            },
-            {
-              "loc": "각방 9mm문틀/문선",
-              "part": "필름",
-              "spec": "영림 화이트스톤 PX451 (기존문틀·문선)",
-              "note": ""
-            },
-            {
-              "loc": "TV자리 아트월",
-              "part": "필름",
-              "spec": "PX451 화이트스톤 + 우측코너 우드포인트(피넛오크) + LED조명",
-              "note": ""
-            },
-            {
-              "loc": "도어",
-              "part": "도어",
-              "spec": "ABS 도어(민판) / 색상 화이트스톤 PX451 / 욕실2개+각방3개+세탁실1개",
-              "note": ""
-            },
-            {
-              "loc": "도어",
-              "part": "손잡이",
-              "spec": "도무스 711NI",
-              "note": ""
-            },
-            {
-              "loc": "중문",
-              "part": "중문",
-              "spec": "비대칭 / 작은문(간살) 큰문(투명+간살없음) / 피넛오크+투명유리",
-              "note": "마크중문"
-            },
-            {
-              "loc": "공용욕실",
-              "part": "양변기",
-              "spec": "웨이브라운드",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "세면대",
-              "spec": "플랫라운드",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "수전",
-              "spec": "에떼르노 (샤워+세면)",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "욕실장",
-              "spec": "여닫이+플랩장 (내부콘O) MM",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "ACC",
-              "spec": "매립형 휴지걸이 / 청소건 없음 / 라인유가",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "조적",
-              "spec": "롱조적 젠다이 / 파티션 없음",
-              "note": ""
-            },
-            {
-              "loc": "공용욕실",
-              "part": "휴젠뜨",
-              "spec": "휴젠뜨 2.5 (서비스)",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "양변기",
-              "spec": "웨이브라운드",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "세면대",
-              "spec": "플랫라운드",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "수전",
-              "spec": "에떼르노 (샤워+세면)",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "욕실장",
-              "spec": "타원형 3색LED/욕실장",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "ACC",
-              "spec": "매립형 휴지걸이 / 청소건 없음 / 라인유가",
-              "note": ""
-            },
-            {
-              "loc": "안방욕실",
-              "part": "조적",
-              "spec": "샤워부 하프조적 / 상부유리(투명)",
-              "note": ""
-            },
-            {
-              "loc": "현관",
-              "part": "가구",
-              "spec": "매트밀크화이트 / 중앙오픈장 피넛오크 / 하단직접X 중앙오픈O",
-              "note": ""
-            },
-            {
-              "loc": "붙박이장",
-              "part": "가구",
-              "spec": "매트밀크화이트 / B02/B07/B07/A02",
-              "note": ""
-            },
-            {
-              "loc": "안방드레스룸 게이트",
-              "part": "가구",
-              "spec": "매트밀크화이트",
-              "note": ""
-            },
-            {
-              "loc": "안방 시스템장",
-              "part": "가구",
-              "spec": "화이트 / 양옆 ㄱ자 짧은2단 가운데 긴옷장",
-              "note": ""
-            },
-            {
-              "loc": "주방(본주방)",
-              "part": "가구",
-              "spec": "포그그레이 + 광폭아일랜드(여닫이)",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "대리석",
-              "spec": "오로라 웜블랑",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "수전",
-              "spec": "카시아 4회전수전",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "싱크볼",
-              "spec": "SQSR 780",
-              "note": "깜보그레테"
-            },
-            {
-              "loc": "주방",
-              "part": "후드",
-              "spec": "스퀘어 아일랜드후드 실버",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "기타",
-              "spec": "아일랜드 밥솥장+전자렌지장",
-              "note": ""
-            },
-            {
-              "loc": "거실",
-              "part": "실링팬",
-              "spec": "팬앤코 화이트+우드",
-              "note": ""
-            },
-            {
-              "loc": "전체",
-              "part": "스위치/콘센트",
-              "spec": "진흥 J시리즈",
-              "note": ""
-            },
-            {
-              "loc": "전체",
-              "part": "조명",
-              "spec": "전체공간 다운라이트 주백 / 주방포인트조명 없음",
-              "note": ""
-            },
-            {
-              "loc": "전체",
-              "part": "도어락",
-              "spec": "고민중 (재사용 여부 체크)",
-              "note": ""
-            },
-            {
-              "loc": "주방",
-              "part": "확산소화기",
-              "spec": "주방 확산소화기 설치요청 (추가금)",
-              "note": ""
-            }
-          ],
-          "savedAt": "",
-          "savedBy": ""
         }
       ]
     },
@@ -7141,7 +6743,9 @@ function renderTable(items) {
 function addRow(data={}) {
   const tbody = document.getElementById('table-body');
   const tr = document.createElement('tr');
+  tr.draggable = true;
   tr.innerHTML = `
+    <td class="drag-handle no-print" title="드래그하여 순서 변경">⠿</td>
     <td><span class="row-num">-</span></td>
     <td><input class="cell-loc"  value="${esc(data.loc||'')}"  placeholder="예: 거실"></td>
     <td><input class="cell-part" value="${esc(data.part||'')}" placeholder="예: 바닥재"></td>
@@ -7150,10 +6754,50 @@ function addRow(data={}) {
     <td class="no-print"><button class="del-btn" onclick="delRow(this)">×</button></td>
   `;
   tr.querySelectorAll('input').forEach(i => i.addEventListener('input', markUnsaved));
+  initDragRow(tr);
   tbody.appendChild(tr);
   updateNums();
 }
 function delRow(btn) { btn.closest('tr').remove(); updateNums(); markUnsaved(); }
+
+/* ── DRAG & DROP 순서 변경 ── */
+let _dragSrc = null;
+function initDragRow(tr) {
+  tr.addEventListener('dragstart', e => {
+    _dragSrc = tr;
+    tr.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  tr.addEventListener('dragend', () => {
+    _dragSrc = null;
+    tr.classList.remove('dragging');
+    document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('drag-over-top','drag-over-bot'));
+    updateNums();
+    markUnsaved();
+  });
+  tr.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (!_dragSrc || _dragSrc === tr) return;
+    document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('drag-over-top','drag-over-bot'));
+    const rect = tr.getBoundingClientRect();
+    const mid  = rect.top + rect.height / 2;
+    tr.classList.add(e.clientY < mid ? 'drag-over-top' : 'drag-over-bot');
+  });
+  tr.addEventListener('dragleave', () => {
+    tr.classList.remove('drag-over-top','drag-over-bot');
+  });
+  tr.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!_dragSrc || _dragSrc === tr) return;
+    const rect = tr.getBoundingClientRect();
+    const mid  = rect.top + rect.height / 2;
+    const tbody = tr.parentNode;
+    if (e.clientY < mid) tbody.insertBefore(_dragSrc, tr);
+    else tbody.insertBefore(_dragSrc, tr.nextSibling);
+    tr.classList.remove('drag-over-top','drag-over-bot');
+  });
+}
+
 function updateNums() { document.querySelectorAll('#table-body tr').forEach((tr,i) => { const s=tr.querySelector('.row-num'); if(s) s.textContent=i+1; }); }
 /* ── 자동저장 (입력 멈춘 후 3초) ── */
 let _autoSaveTimer = null;
